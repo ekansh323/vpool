@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'VPool',
+      title: 'ViPool',
       theme: ThemeData(
         useMaterial3: true,
 
@@ -188,7 +188,7 @@ class _ExploreRideScreenState extends State<ExploreRideScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("VPool", style: TextStyle(color: Colors.white)),
+        title: const Text("ViPool", style: TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.account_circle),
           onPressed: () {
@@ -572,7 +572,7 @@ class RideDetailsPage extends StatelessWidget {
                         onPressed: () async {
                           final number = data['whatsapp'];
                           final message =
-                              "Hi, I saw your ${data['from']} → ${data['to']} ride on VPool.";
+                              "Hi, I saw your ${data['from']} → ${data['to']} ride on ViPool.";
 
                           final url =
                               "https://wa.me/$number?text=${Uri.encodeComponent(message)}";
@@ -1030,7 +1030,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 16),
 
                     const Text(
-                      'VPool',
+                      'ViPool',
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
@@ -1925,7 +1925,7 @@ class ProfilePage extends StatelessWidget {
             _SectionTitle("About"),
             _ProfileTile(
               icon: Icons.info_outline,
-              title: "About VPool",
+              title: "About ViPool",
               onTap: () => showAboutVPool(context),
             ),
             _ProfileTile(
@@ -2038,12 +2038,12 @@ void showAboutVPool(BuildContext context) {
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
-      title: const Text("About VPool"),
+      title: const Text("About ViPool"),
       content: const Text(
-        "VPool was created to solve a real problem many VIT students face, "
+        "ViPool was created to solve a real problem many VIT students face, "
         "finding reliable carpool options for travel between campus, stations, and airports.\n\n"
         "This is a real world project built based on personal experience.\n\n"
-        "VPool is not an official VIT application. Feedback, suggestions, and bug reports are "
+        "ViPool is not an official VIT application. Feedback, suggestions, and bug reports are "
         "always welcome via the GitHub project.",
       ),
       actions: [
@@ -2063,9 +2063,9 @@ void showPrivacyDialog(BuildContext context) {
       title: const Text("Privacy & Disclaimer"),
       content: SingleChildScrollView(
         child: const Text(
-          "• VPool does not verify rides or users beyond VIT email authentication.\n\n"
+          "• ViPool does not verify rides or users beyond VIT email authentication.\n\n"
           "• Personal data such as email is used only for authentication and ride matching.\n\n"
-          "• VPool does not store passwords or private messages.\n\n",
+          "• ViPool does not store passwords or private messages.\n\n",
         ),
       ),
       actions: [
