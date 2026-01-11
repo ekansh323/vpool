@@ -17,8 +17,8 @@ Seats update automatically
 Contact between riders happens via WhatsApp
 Includes a basic profile section with ride stats
 ## Tech Stack
-Flutter
-Firebase Authentication
+Flutter\n
+Firebase Authentication\n
 Cloud Firestore
 ## Platform
 Android (tested on emulator and physical device)
