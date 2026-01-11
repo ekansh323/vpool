@@ -43,6 +43,11 @@ class MyApp extends StatelessWidget {
       title: 'ViPool',
       theme: ThemeData(
         useMaterial3: true,
+        snackBarTheme: const SnackBarThemeData(
+          backgroundColor: Color(0xFF1A1A22),
+          contentTextStyle: TextStyle(color: Colors.white, fontSize: 14),
+          behavior: SnackBarBehavior.floating,
+        ),
 
         scaffoldBackgroundColor: const Color(0xFF0E0E12),
 
@@ -863,18 +868,26 @@ class _CreateRidePageState extends State<CreateRidePage> {
             ),
 
             const Spacer(),
-
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: loading ? null : saveRide,
-                child: loading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        "Post Ride",
-                        style: TextStyle(color: Colors.white),
-                      ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: loading ? null : saveRide,
+                    child: loading
+                        ? const CircularProgressIndicator(color: Colors.black)
+                        : const Text(
+                            "Post Ride",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
               ),
             ),
           ],
