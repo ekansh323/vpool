@@ -1,5 +1,5 @@
 
-## VIT Carpool - ViPool
+# VIT Carpool - ViPool
 
 ViPool is a student‑built carpooling app made for VIT students to find and share rides between campus, railway stations, and airports.
 
