@@ -1918,6 +1918,19 @@ class ProfilePage extends StatelessWidget {
                 mode: LaunchMode.externalApplication,
               ),
             ),
+            const SizedBox(height: 20),
+
+            _SectionTitle("About"),
+            _ProfileTile(
+              icon: Icons.info_outline,
+              title: "About VPool",
+              onTap: () => showAboutVPool(context),
+            ),
+            _ProfileTile(
+              icon: Icons.privacy_tip_outlined,
+              title: "Privacy & Disclaimer",
+              onTap: () => showPrivacyDialog(context),
+            ),
 
             const SizedBox(height: 30),
 
@@ -1936,7 +1949,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
 
 class _StatCard extends StatelessWidget {
   final String title;
@@ -2018,4 +2030,50 @@ class _SectionTitle extends StatelessWidget {
       ),
     );
   }
+}
+
+void showAboutVPool(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("About VPool"),
+      content: const Text(
+        "VPool was created to solve a real problem many VIT students face, "
+        "finding reliable carpool options for travel between campus, stations, and airports.\n\n"
+        "This is a real world project built based on personal experience.\n\n"
+        "VPool is not an official VIT application. Feedback, suggestions, and bug reports are "
+        "always welcome via the GitHub project.",
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("OK"),
+        ),
+      ],
+    ),
+  );
+}
+
+void showPrivacyDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("Privacy & Disclaimer"),
+      content: SingleChildScrollView(
+        child: const Text(
+          "• VPool does not verify rides or users beyond VIT email authentication.\n\n"
+         
+          "• Personal data such as email is used only for authentication and ride matching.\n\n"
+          "• VPool does not store passwords or private messages.\n\n"
+          ,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("I Understand"),
+        ),
+      ],
+    ),
+  );
 }
