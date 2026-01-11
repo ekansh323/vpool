@@ -9,8 +9,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 final ValueNotifier<int> searchNotifier = ValueNotifier(0);
 
 class RideFilter {
-  static String from = "Any";
-  static String to = "Any";
+  static String from = "VIT Vellore";
+  static String to = "Chennai Airport";
   static DateTime? date;
 }
 
@@ -572,7 +572,7 @@ class RideDetailsPage extends StatelessWidget {
                         onPressed: () async {
                           final number = data['whatsapp'];
                           final message =
-                              "Hi, I saw your ${data['from']} → ${data['to']} ride on VITPool.";
+                              "Hi, I saw your ${data['from']} → ${data['to']} ride on VPool.";
 
                           final url =
                               "https://wa.me/$number?text=${Uri.encodeComponent(message)}";
@@ -703,7 +703,8 @@ class CreateRidePage extends StatefulWidget {
 }
 
 class _CreateRidePageState extends State<CreateRidePage> {
-  String from = "VIT";
+  String from = "VIT Vellore";
+
   String to = "Chennai Airport";
   DateTime? date;
   TimeOfDay? time;
@@ -713,7 +714,8 @@ class _CreateRidePageState extends State<CreateRidePage> {
   final whatsappController = TextEditingController();
 
   final locations = [
-    "VIT",
+    "VIT Vellore",
+    "VIT Chennai",
     "Katpadi Station",
     "Chennai Airport",
     "Bangalore Airport",
@@ -1490,8 +1492,8 @@ class FilterBar extends StatefulWidget {
 
 class _FilterBarState extends State<FilterBar> {
   final locations = [
-    "Any",
-    "VIT",
+    "VIT Vellore",
+    "VIT Chennai",
     "Katpadi Station",
     "Chennai Airport",
     "Bangalore Airport",
@@ -1631,10 +1633,10 @@ class RideList extends StatelessWidget {
 
     Query query = FirebaseFirestore.instance.collection('rides');
 
-    if (RideFilter.from != "Any") {
+    if (RideFilter.from != "VIT Vellore") {
       query = query.where('from', isEqualTo: RideFilter.from);
     }
-    if (RideFilter.to != "Any") {
+    if (RideFilter.to != "Chennai Airport") {
       query = query.where('to', isEqualTo: RideFilter.to);
     }
 
@@ -2062,10 +2064,8 @@ void showPrivacyDialog(BuildContext context) {
       content: SingleChildScrollView(
         child: const Text(
           "• VPool does not verify rides or users beyond VIT email authentication.\n\n"
-         
           "• Personal data such as email is used only for authentication and ride matching.\n\n"
-          "• VPool does not store passwords or private messages.\n\n"
-          ,
+          "• VPool does not store passwords or private messages.\n\n",
         ),
       ),
       actions: [
