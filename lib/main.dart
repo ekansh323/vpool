@@ -189,17 +189,16 @@ class _ExploreRideScreenState extends State<ExploreRideScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("VPool", style: TextStyle(color: Colors.white)),
-        leading: PopupMenuButton<String>(
+        leading: IconButton(
           icon: const Icon(Icons.account_circle),
-          itemBuilder: (context) => [
-            PopupMenuItem(enabled: false, child: Text(user?.email ?? '')),
-            const PopupMenuDivider(),
-            const PopupMenuItem(value: 'logout', child: Text('Logout')),
-          ],
-          onSelected: (value) {
-            if (value == 'logout') logout();
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilePage()),
+            );
           },
         ),
+
         actions: [
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
@@ -1112,7 +1111,7 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: signInWithGoogle,
                       icon: Image.asset('assets/google.png', height: 20),
                       label: const Text(
-                        'Sign in with VIT Google',
+                        'Sign in with VIT Mail ID',
                         style: TextStyle(fontSize: 15),
                       ),
                       style: OutlinedButton.styleFrom(
@@ -1829,4 +1828,194 @@ String getBatchFromEmail(String email) {
 String capitalize(String s) {
   if (s.isEmpty) return s;
   return s[0].toUpperCase() + s.substring(1).toLowerCase();
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser!;
+    final email = user.email!;
+    final name = getNameFromEmail(email);
+    final batch = getBatchFromEmail(email);
+
+    final postedStream = FirebaseFirestore.instance
+        .collection('rides')
+        .where('owner', isEqualTo: email)
+        .snapshots();
+
+    final joinedStream = FirebaseFirestore.instance
+        .collection('rides')
+        .where('passengers', arrayContains: email)
+        .snapshots();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("Profile")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 36,
+              backgroundColor: const Color(0xFF00E5A8),
+              child: Text(
+                name.isNotEmpty ? name[0] : "V",
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              name,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            Text("Batch $batch", style: const TextStyle(color: Colors.white70)),
+            const SizedBox(height: 4),
+            Text(email, style: const TextStyle(color: Colors.white54)),
+
+            const SizedBox(height: 24),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _StatCard(title: "Posted", stream: postedStream),
+                _StatCard(title: "Joined", stream: joinedStream),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            _SectionTitle("Connect"),
+            _ProfileTile(
+              icon: Icons.link,
+              title: "LinkedIn",
+              onTap: () => launchUrl(
+                Uri.parse("https://www.linkedin.com/in/ekansh-yadav/"),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+            _ProfileTile(
+              icon: Icons.code,
+              title: "GitHub Project",
+              onTap: () => launchUrl(
+                Uri.parse("https://github.com/ekansh323/vpool"),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _SectionTitle("Feedback"),
+            _ProfileTile(
+              icon: Icons.feedback,
+              title: "Send feedback / report bug",
+              onTap: () => launchUrl(
+                Uri.parse("https://github.com/YOUR_REPO/issues"),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            _ProfileTile(
+              icon: Icons.logout,
+              title: "Logout",
+              isDestructive: true,
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _StatCard extends StatelessWidget {
+  final String title;
+  final Stream<QuerySnapshot> stream;
+
+  const _StatCard({required this.title, required this.stream});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: stream,
+      builder: (_, snap) {
+        final count = snap.data?.docs.length ?? 0;
+        return Column(
+          children: [
+            Text(
+              count.toString(),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(title, style: const TextStyle(color: Colors.white70)),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ProfileTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _ProfileTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isDestructive ? Colors.redAccent : Colors.white,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isDestructive ? Colors.redAccent : Colors.white,
+        ),
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white70,
+          ),
+        ),
+      ),
+    );
+  }
 }
