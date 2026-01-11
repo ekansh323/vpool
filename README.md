@@ -20,7 +20,8 @@ The idea came from a common problem many VIT students face, finding reliable peo
 - Firebase Security Rules<br>
 ## Platform
 Android (tested on emulator and physical device)
-## DisclaimerViPool is a student project and not an official VIT application.
+## Disclaimer
+ViPool is a student project and not an official VIT application.
 
 - Users are authenticated using VIT email IDs<br>
 - Rides and users are not manually verified<br>
