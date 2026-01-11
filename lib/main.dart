@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 final ValueNotifier<int> searchNotifier = ValueNotifier(0);
 
@@ -32,9 +33,6 @@ void main() async {
   runApp(const MyApp());
 }
 
-
-
-// ---------------- APP ROOT ----------------s
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -42,16 +40,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'VIT Carpool',
+      title: 'VPool',
       theme: ThemeData(
-        
         useMaterial3: true,
 
-        // App background
         scaffoldBackgroundColor: const Color(0xFF0E0E12),
 
         colorScheme: ColorScheme.dark(
-          primary: const Color(0xFF00E5A8), // mint accent
+          primary: const Color(0xFF00E5A8),
           secondary: const Color(0xFF4FC3F7),
           background: const Color(0xFF0E0E12),
           surface: const Color(0xFF1A1A22),
@@ -102,8 +98,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ---------------- AUTH GATE ----------------
-
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -132,8 +126,6 @@ class AuthGate extends StatelessWidget {
     );
   }
 }
-
-// ---------------- HOME PAGE ----------------
 //
 
 class HomePage extends StatefulWidget {
@@ -194,10 +186,7 @@ class _ExploreRideScreenState extends State<ExploreRideScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "VIT → Airport Carpool",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("VPool", style: TextStyle(color: Colors.white)),
         leading: PopupMenuButton<String>(
           icon: const Icon(Icons.account_circle),
           itemBuilder: (context) => [
@@ -415,18 +404,16 @@ class RideDetailsPage extends StatelessWidget {
                       stream: joinedStream,
                       builder: (_, snap) {
                         final count = snap.data?.docs.length ?? 0;
-                        
+
                         return Text(
                           "Joined $count rides",
                           style: TextStyle(color: Colors.white),
                         );
-                        
                       },
                     ),
                   ],
                 ),
-                if (data['owner'] == user?.email &&
-                    passengers.isNotEmpty) ...[
+                if (data['owner'] == user?.email && passengers.isNotEmpty) ...[
                   const SizedBox(height: 20),
                   const Divider(),
                   const SizedBox(height: 10),
@@ -584,7 +571,7 @@ class RideDetailsPage extends StatelessWidget {
                         onPressed: () async {
                           final number = data['whatsapp'];
                           final message =
-                              "Hi, I saw your ${data['from']} → ${data['to']} ride on VIT Carpool.";
+                              "Hi, I saw your ${data['from']} → ${data['to']} ride on VITPool.";
 
                           final url =
                               "https://wa.me/$number?text=${Uri.encodeComponent(message)}";
@@ -615,8 +602,6 @@ class RideDetailsPage extends StatelessWidget {
     );
   }
 
-  // ---------------- REQUEST SYSTEM ----------------
-
   static Future<void> requestRide(
     BuildContext context,
     String rideId,
@@ -628,7 +613,6 @@ class RideDetailsPage extends StatelessWidget {
 
     final email = user.email!;
 
-    // Block owner from requesting their own ride
     if (ride['owner'] == email) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -737,7 +721,6 @@ class _CreateRidePageState extends State<CreateRidePage> {
   Future<void> saveRide() async {
     final phone = whatsappController.text.trim();
 
-    // Validate phone
     if (phone.length != 10 || int.tryParse(phone) == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -924,104 +907,173 @@ class _LoginPageState extends State<LoginPage> {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-    } catch (e) {
+    } catch (_) {
       setState(() {
         error = 'Invalid email or password';
       });
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      final googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+
+      final googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCred =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final email = userCred.user!.email ?? '';
+
+      if (!email.endsWith('@vitstudent.ac.in')) {
+        await FirebaseAuth.instance.signOut();
+        throw 'Only VIT student emails allowed';
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Card(
-            elevation: 8,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'VIT Airport Carpool',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Login with your VIT email',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey.shade600),
-                  ),
-                  const SizedBox(height: 30),
-
-                  TextField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextField(
-                    controller: passwordController,
-                    obscureText: !isPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock),
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.black54, Color(0xFF7B1FA2), Colors.purple,Colors.black],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Card(
+              elevation: 14,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'VPool',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-
-                  if (error.isNotEmpty) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 6),
                     Text(
-                      error,
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
+                      'VIT Airport Carpool',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                    const SizedBox(height: 30),
+
+                    TextField(
+                      controller: emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'VIT Email',
+                        prefixIcon: Icon(Icons.email),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: passwordController,
+                      obscureText: !isPasswordVisible,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: const Icon(Icons.lock),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isPasswordVisible
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () => setState(
+                            () => isPasswordVisible = !isPasswordVisible,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    if (error.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        error,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : login,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                'Login',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
+
+                    OutlinedButton.icon(
+                      onPressed: signInWithGoogle,
+                      icon: Image.asset(
+                        'assets/google.png',
+                        height: 20,
+                      ),
+                      label: const Text(
+                        'Sign in with VIT Google',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
                     ),
                   ],
-
-                  const SizedBox(height: 24),
-
-                  ElevatedButton(
-                    onPressed: isLoading ? null : login,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "Login",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -1305,7 +1357,7 @@ class MyRequestedRides extends StatelessWidget {
 }
 
 Map<String, String> parseVitEmail(String email) {
-  final local = email.split('@')[0]; // firstname.lastname2024
+  final local = email.split('@')[0];
   final namePart = local.replaceAll(RegExp(r'\d'), '');
   final yearPart = local.replaceAll(RegExp(r'\D'), '');
 
@@ -1705,8 +1757,8 @@ class RideList extends StatelessWidget {
 
 String getNameFromEmail(String email) {
   // ekansh.yadav2024@vitstudent.ac.in
-  final local = email.split('@')[0]; // ekansh.yadav2024
-  final namePart = local.replaceAll(RegExp(r'\d'), ''); // ekansh.yadav
+  final local = email.split('@')[0];
+  final namePart = local.replaceAll(RegExp(r'\d'), '');
   final parts = namePart.split('.');
 
   final first = parts.isNotEmpty ? parts[0] : '';
@@ -1716,7 +1768,7 @@ String getNameFromEmail(String email) {
 }
 
 String getBatchFromEmail(String email) {
-  final local = email.split('@')[0]; // ekansh.yadav2024
+  final local = email.split('@')[0];
   final match = RegExp(r'\d{4}').firstMatch(local);
   return match != null ? match.group(0)! : "—";
 }

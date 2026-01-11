@@ -12,7 +12,20 @@
           "package_name": "com.example.vit_carpool"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "745121198228-mfuoifp956olqf2e2m8dnh06k0ijkr95.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.vit_carpool",
+            "certificate_hash": "c8430ae58b1647d1367fdf24590cd409e72989db"
+          }
+        },
+        {
+          "client_id": "745121198228-lc61pfi5s6nl8mcbd689fi1s3jbf0t47.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCLUXQHtnE7yQB2BYyDPAzkeBS30cXwkIs"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "745121198228-lc61pfi5s6nl8mcbd689fi1s3jbf0t47.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
