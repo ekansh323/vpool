@@ -6,13 +6,13 @@ ViPool is a student‑built carpooling app made for VIT students to find and sha
 The idea came from a common problem many vit students face, finding reliable people to travel with during holidays. ViPool makes it easier for students to connect with each other for shared rides in a simple and safe way.
 
 ## What ViPool does
-Lets students post carpool rides
-Allows others to search and filter rides by route and date
-Riders can request to join a ride
-Ride owners can approve or reject requests
-Seats update automatically
-Contact between riders happens via WhatsApp
-Includes a basic profile section with ride stats
+- Lets students post carpool rides <br>
+- Allows others to search and filter rides by route and date<br>
+- Riders can request to join a ride<br>
+- Ride owners can approve or reject requests<br>
+- Seats update automatically<br>
+- Contact between riders happens via WhatsApp<br>
+- Includes a basic profile section with ride stats<br>
 ## Tech Stack
 Flutter<br>
 Firebase Authentication<br>
