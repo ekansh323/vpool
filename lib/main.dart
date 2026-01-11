@@ -114,10 +114,12 @@ class AuthGate extends StatelessWidget {
 
         if (snapshot.hasData) {
           final user = snapshot.data!;
-          FirebaseFirestore.instance.collection('users').doc(user.email).set({
-            'email': user.email,
-            'createdAt': FieldValue.serverTimestamp(),
-          }, SetOptions(merge: true));
+          Future.microtask(() {
+            FirebaseFirestore.instance.collection('users').doc(user.email).set({
+              'email': user.email,
+              'createdAt': FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+          });
           return const HomePage();
         } else {
           return const LoginPage();
@@ -928,8 +930,9 @@ class _LoginPageState extends State<LoginPage> {
         idToken: googleAuth.idToken,
       );
 
-      final userCred =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+      final userCred = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
 
       final email = userCred.user!.email ?? '';
 
@@ -939,9 +942,9 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -951,7 +954,12 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.black54, Color(0xFF7B1FA2), Colors.purple,Colors.black],
+            colors: [
+              Colors.black54,
+              Color(0xFF7B1FA2),
+              Colors.purple,
+              Colors.black,
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -1015,10 +1023,7 @@ class _LoginPageState extends State<LoginPage> {
 
                     if (error.isNotEmpty) ...[
                       const SizedBox(height: 12),
-                      Text(
-                        error,
-                        style: const TextStyle(color: Colors.red),
-                      ),
+                      Text(error, style: const TextStyle(color: Colors.red)),
                     ],
 
                     const SizedBox(height: 24),
@@ -1054,10 +1059,7 @@ class _LoginPageState extends State<LoginPage> {
 
                     OutlinedButton.icon(
                       onPressed: signInWithGoogle,
-                      icon: Image.asset(
-                        'assets/google.png',
-                        height: 20,
-                      ),
+                      icon: Image.asset('assets/google.png', height: 20),
                       label: const Text(
                         'Sign in with VIT Google',
                         style: TextStyle(fontSize: 15),
