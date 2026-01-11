@@ -571,7 +571,7 @@ class RideDetailsPage extends StatelessWidget {
                       OutlinedButton.icon(
                         icon: const Icon(Icons.chat, color: Colors.white),
                         label: const Text(
-                          "Chat on WhatsApp",
+                          "Contact via WhatsApp",
                           style: TextStyle(color: Colors.white),
                         ),
                         onPressed: () async {
@@ -733,7 +733,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            "Enter a valid 10-digit WhatsApp number",
+            "Enter a valid WhatsApp number",
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -745,7 +745,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            "Select date and time",
+            "Please select date & time",
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -878,7 +878,14 @@ class _CreateRidePageState extends State<CreateRidePage> {
                   child: ElevatedButton(
                     onPressed: loading ? null : saveRide,
                     child: loading
-                        ? const CircularProgressIndicator(color: Colors.black)
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.black,
+                            ),
+                          )
                         : const Text(
                             "Post Ride",
                             style: TextStyle(
@@ -1621,7 +1628,7 @@ class _FilterBarState extends State<FilterBar> {
                 icon: const Icon(Icons.search),
                 label: const Text(
                   "Search rides",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.black),
                 ),
                 onPressed: () {
                   searchNotifier.value++;
