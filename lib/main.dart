@@ -1175,7 +1175,9 @@ class OwnerRequestsPage extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('requests')
             .where('ownerEmail', isEqualTo: user!.email)
+            .where('status', isEqualTo: 'pending')
             .snapshots(),
+
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return ListView.builder(
@@ -1936,7 +1938,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.feedback,
               title: "Send feedback / report bug",
               onTap: () => launchUrl(
-                Uri.parse("https://github.com/YOUR_REPO/issues"),
+                Uri.parse("https://github.com/ekansh323/vpool/issues"),
                 mode: LaunchMode.externalApplication,
               ),
             ),
