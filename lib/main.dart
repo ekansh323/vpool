@@ -794,6 +794,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
     "Katpadi Station",
     "Chennai Airport",
     "Bangalore Airport",
+    "Chittoor New Bus Stand",
   ];
 
   Future<void> saveRide() async {
@@ -858,24 +859,38 @@ class _CreateRidePageState extends State<CreateRidePage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            DropdownButtonFormField(
+            DropdownButtonFormField<String>(
               value: from,
+              isExpanded: true, // 🔥 THIS FIXES OVERFLOW
               items: locations
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e, overflow: TextOverflow.ellipsis),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) => setState(() => from = v!),
               decoration: const InputDecoration(labelText: "From"),
             ),
+
             const SizedBox(height: 12),
 
-            DropdownButtonFormField(
+            DropdownButtonFormField<String>(
               value: to,
+              isExpanded: true,
               items: locations
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e, overflow: TextOverflow.ellipsis),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) => setState(() => to = v!),
               decoration: const InputDecoration(labelText: "To"),
             ),
+
             const SizedBox(height: 12),
 
             TextField(
@@ -1639,6 +1654,7 @@ class _FilterBarState extends State<FilterBar> {
     "Katpadi Station",
     "Chennai Airport",
     "Bangalore Airport",
+    "Chittoor New Bus Stand",
   ];
   void showAllRides() {
     setState(() {
@@ -1670,6 +1686,7 @@ class _FilterBarState extends State<FilterBar> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: RideFilter.from,
+                    isExpanded: true,
                     dropdownColor: const Color(0xFF1A1A22),
                     style: const TextStyle(color: Colors.white),
                     items: locations
@@ -1699,6 +1716,7 @@ class _FilterBarState extends State<FilterBar> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: RideFilter.to,
+                    isExpanded: true,
                     dropdownColor: const Color(0xFF1A1A22),
                     style: const TextStyle(color: Colors.white),
                     items: locations
