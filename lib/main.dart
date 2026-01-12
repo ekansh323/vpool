@@ -194,14 +194,34 @@ class _ExploreRideScreenState extends State<ExploreRideScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("ViPool", style: TextStyle(color: Colors.white)),
-        leading: IconButton(
-          icon: const Icon(Icons.account_circle),
-          onPressed: () {
+        leading: GestureDetector(
+          onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ProfilePage()),
             );
           },
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: const Color(0xFF00E5A8),
+              backgroundImage:
+                  FirebaseAuth.instance.currentUser?.photoURL != null
+                  ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!)
+                  : null,
+              child: FirebaseAuth.instance.currentUser?.photoURL == null
+                  ? Text(
+                      FirebaseAuth.instance.currentUser!.email![0]
+                          .toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
+            ),
+          ),
         ),
 
         actions: [
