@@ -526,7 +526,7 @@ class RideDetailsPage extends StatelessWidget {
                                 child: const Text(
                                   "Request to Join",
                                   style: TextStyle(
-                                    color: Colors.black54,
+                                    color: Colors.black,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -575,8 +575,7 @@ class RideDetailsPage extends StatelessWidget {
                           style: TextStyle(color: Colors.white),
                         ),
                         onPressed: () async {
-                          final number =
-                              data['whatsapp']; 
+                          final number = data['whatsapp'];
                           final message =
                               "Hi, I saw your ${data['from']} → ${data['to']} ride on ViPool.";
 
@@ -861,15 +860,36 @@ class _CreateRidePageState extends State<CreateRidePage> {
 
             Row(
               children: [
-                const Text("Seats"),
+                const Text(
+                  "Seats",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Slider(
                     value: seats.toDouble(),
                     min: 1,
                     max: 6,
                     divisions: 5,
-                    label: seats.toString(),
                     onChanged: (v) => setState(() => seats = v.toInt()),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00E5A8).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    "$seats",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF00E5A8),
+                    ),
                   ),
                 ),
               ],
@@ -1528,6 +1548,16 @@ class _FilterBarState extends State<FilterBar> {
     "Chennai Airport",
     "Bangalore Airport",
   ];
+  void showAllRides() {
+    setState(() {
+      RideFilter.from = "VIT Vellore";
+      RideFilter.to = "Chennai Airport";
+      RideFilter.date = null;
+    });
+
+    // Force Firestore to re-run with no filters
+    searchNotifier.value++;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1632,18 +1662,31 @@ class _FilterBarState extends State<FilterBar> {
 
             const SizedBox(height: 12),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.search),
-                label: const Text(
-                  "Search rides",
-                  style: TextStyle(color: Colors.black),
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.search),
+                    label: const Text(
+                      "Search rides",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    onPressed: () {
+                      searchNotifier.value++;
+                    },
+                  ),
                 ),
-                onPressed: () {
-                  searchNotifier.value++;
-                },
-              ),
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: showAllRides,
+                  icon: const Icon(Icons.view_list),
+                  label: const Text(
+                    "Show all rides",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
