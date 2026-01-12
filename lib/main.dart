@@ -575,21 +575,29 @@ class RideDetailsPage extends StatelessWidget {
                           style: TextStyle(color: Colors.white),
                         ),
                         onPressed: () async {
-                          final number = data['whatsapp'];
+                          final number =
+                              data['whatsapp']; 
                           final message =
                               "Hi, I saw your ${data['from']} → ${data['to']} ride on ViPool.";
 
-                          final url =
-                              "https://wa.me/$number?text=${Uri.encodeComponent(message)}";
+                          final uri = Uri.parse(
+                            "https://api.whatsapp.com/send?phone=$number&text=${Uri.encodeComponent(message)}",
+                          );
 
-                          final uri = Uri.parse(url);
-                          if (await canLaunchUrl(uri)) {
+                          try {
                             await launchUrl(
                               uri,
                               mode: LaunchMode.externalApplication,
                             );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Could not open WhatsApp"),
+                              ),
+                            );
                           }
                         },
+
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.white24),
                           shape: RoundedRectangleBorder(
