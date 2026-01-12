@@ -382,6 +382,38 @@ class RideDetailsPage extends StatelessWidget {
                   "Time: ${data['time']}",
                   style: TextStyle(color: Colors.white),
                 ),
+                if ((data['caption'] ?? '').toString().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A22),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            data['caption'],
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 Text(
                   "Seats available: ${data['seats']}",
                   style: TextStyle(color: Colors.white),
@@ -537,30 +569,39 @@ class RideDetailsPage extends StatelessWidget {
                           final status = snapshot.data!.docs.first['status'];
 
                           if (status == 'pending') {
-                            return const Text(
-                              "Request Pending ⏳",
-                              style: TextStyle(
-                                color: Colors.orangeAccent,
-                                fontSize: 16,
+                            return const Center(
+                              child: Text(
+                                "Request Pending ⏳",
+                                style: TextStyle(
+                                  color: Colors.orangeAccent,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             );
                           }
 
                           if (status == 'approved') {
-                            return const Text(
-                              "Approved ✅",
-                              style: TextStyle(
-                                color: Colors.greenAccent,
-                                fontSize: 16,
+                            return const Center(
+                              child: Text(
+                                "Approved ✅",
+                                style: TextStyle(
+                                  color: Colors.greenAccent,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             );
                           }
 
-                          return const Text(
-                            "Rejected ❌",
-                            style: TextStyle(
-                              color: Colors.redAccent,
-                              fontSize: 16,
+                          return const Center(
+                            child: Text(
+                              "Rejected ❌",
+                              style: TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           );
                         },
@@ -715,6 +756,8 @@ class CreateRidePage extends StatefulWidget {
 }
 
 class _CreateRidePageState extends State<CreateRidePage> {
+  final captionController = TextEditingController();
+
   String from = "VIT Vellore";
 
   String to = "Chennai Airport";
@@ -778,6 +821,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
       'seats': seats,
       'owner': user?.email,
       'whatsapp': "91$phone",
+      'caption': captionController.text.trim(),
       'requests': [],
       'passengers': [],
       'createdAt': FieldValue.serverTimestamp(),
@@ -858,6 +902,8 @@ class _CreateRidePageState extends State<CreateRidePage> {
               },
             ),
 
+            const SizedBox(height: 8),
+
             Row(
               children: [
                 const Text(
@@ -895,7 +941,22 @@ class _CreateRidePageState extends State<CreateRidePage> {
               ],
             ),
 
+            const SizedBox(height: 16),
+
+            TextField(
+              controller: captionController,
+              maxLines: 2,
+              maxLength: 120,
+              decoration: const InputDecoration(
+                labelText: "Ride note (optional)",
+                hintText:
+                    "e.g. T-Block pickup, T2 Terminal, Female/Male preferred, 1 small luggage",
+                alignLabelWithHint: true,
+              ),
+            ),
+
             const Spacer(),
+
             SafeArea(
               top: false,
               child: Padding(
@@ -1386,14 +1447,25 @@ class MyPostedRides extends StatelessWidget {
 
         return ListView(
           children: rides.map((ride) {
-            return ListTile(
-              title: Text(
-                "${ride['from']} → ${ride['to']}",
-                style: TextStyle(color: Colors.white),
-              ),
-              subtitle: Text(
-                "${ride['date']} at ${ride['time']}",
-                style: TextStyle(color: Colors.white),
+            return Card(
+              child: ListTile(
+                title: Text(
+                  "${ride['from']} → ${ride['to']}",
+                  style: const TextStyle(color: Colors.white),
+                ),
+                subtitle: Text(
+                  "${ride['date']} at ${ride['time']}",
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MyRideDetailsPage(rideId: ride.id),
+                    ),
+                  );
+                },
               ),
             );
           }).toList(),
@@ -2149,4 +2221,103 @@ void showPrivacyDialog(BuildContext context) {
       ],
     ),
   );
+}
+
+class MyRideDetailsPage extends StatelessWidget {
+  final String rideId;
+  const MyRideDetailsPage({super.key, required this.rideId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("My Ride Status")),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('rides')
+            .doc(rideId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final passengers = List<String>.from(data['passengers'] ?? []);
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${data['from']} → ${data['to']}",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                Text("Date: ${data['date']}"),
+                Text("Time: ${data['time']}"),
+                const SizedBox(height: 8),
+
+                // SEATS
+                Text(
+                  "Seats left: ${data['seats']}",
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+
+                const SizedBox(height: 16),
+                const Divider(),
+
+                Text(
+                  "Joined Passengers (${passengers.length})",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                if (passengers.isEmpty)
+                  const Text(
+                    "No one has joined yet",
+                    style: TextStyle(color: Colors.white70),
+                  )
+                else
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: passengers.length,
+                      itemBuilder: (context, index) {
+                        final email = passengers[index];
+                        return Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.person),
+                            title: Text(email),
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.remove_circle,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                RideDetailsPage.removePassenger(
+                                  context,
+                                  rideId,
+                                  email,
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
