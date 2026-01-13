@@ -1446,6 +1446,8 @@ class MyPostedRides extends StatelessWidget {
         return ListView(
           children: rides.map((ride) {
             final isActive = ride['isActive'] == true;
+            final isExpired = (ride.data() as Map<String, dynamic>)['expired'] == true;
+
 
             return Card(
               child: ListTile(
@@ -1455,7 +1457,11 @@ class MyPostedRides extends StatelessWidget {
                       child: Text(
                         "${ride['from']} → ${ride['to']}",
                         style: TextStyle(
-                          color: isActive ? Colors.white : Colors.redAccent,
+                          color: isActive
+                              ? Colors.white
+                              : isExpired
+                              ? Colors.orangeAccent
+                              : Colors.redAccent,
                           decoration: isActive
                               ? null
                               : TextDecoration.lineThrough,
@@ -1463,12 +1469,14 @@ class MyPostedRides extends StatelessWidget {
                       ),
                     ),
                     if (!isActive)
-                      const Padding(
-                        padding: EdgeInsets.only(left: 6),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
                         child: Text(
-                          "DELETED",
+                          isExpired ? "EXPIRED" : "DELETED",
                           style: TextStyle(
-                            color: Colors.redAccent,
+                            color: isExpired
+                                ? Colors.orangeAccent
+                                : Colors.redAccent,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -1476,6 +1484,7 @@ class MyPostedRides extends StatelessWidget {
                       ),
                   ],
                 ),
+
                 subtitle: Text(
                   "${ride['date']} at ${ride['time']}",
                   style: TextStyle(
@@ -1497,6 +1506,7 @@ class MyPostedRides extends StatelessWidget {
                         ],
                       )
                     : null,
+
                 onTap: isActive
                     ? () {
                         Navigator.push(
@@ -1862,6 +1872,16 @@ class RideList extends StatelessWidget {
         }
 
         final rides = snapshot.data!.docs;
+
+        for (final doc in rides) {
+          final data = doc.data() as Map<String, dynamic>;
+          if (data['isActive'] == true && isRideExpired(data)) {
+            FirebaseFirestore.instance.collection('rides').doc(doc.id).update({
+              'isActive': false,
+              'expired': true, // 👈 NEW FIELD
+            });
+          }
+        }
 
         if (rides.isEmpty) {
           return Center(
@@ -2396,4 +2416,16 @@ void confirmHideRide(BuildContext context, String rideId) {
       ],
     ),
   );
+}
+
+bool isRideExpired(Map<String, dynamic> ride) {
+  try {
+    final date = ride['date']; // yyyy-mm-dd
+    final time = ride['time']; // HH:mm
+
+    final dt = DateTime.parse("$date $time");
+    return dt.isBefore(DateTime.now());
+  } catch (_) {
+    return false;
+  }
 }
