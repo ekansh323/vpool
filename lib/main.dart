@@ -862,7 +862,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
           children: [
             DropdownButtonFormField<String>(
               value: from,
-              isExpanded: true, // 🔥 THIS FIXES OVERFLOW
+              isExpanded: true, 
               items: locations
                   .map(
                     (e) => DropdownMenuItem(
@@ -1828,7 +1828,7 @@ class RideList extends StatelessWidget {
   Widget build(BuildContext context) {
     final _ = searchNotifier.value; // 👈 makes widget depend on notifier
 
-    // force rebuild when search button is pressed
+  
 
     Query query = FirebaseFirestore.instance
         .collection('rides')
@@ -1878,7 +1878,7 @@ class RideList extends StatelessWidget {
           if (data['isActive'] == true && isRideExpired(data)) {
             FirebaseFirestore.instance.collection('rides').doc(doc.id).update({
               'isActive': false,
-              'expired': true, // 👈 NEW FIELD
+              'expired': true,
             });
           }
         }
@@ -2330,7 +2330,7 @@ class MyRideDetailsPage extends StatelessWidget {
                 Text("Time: ${data['time']}"),
                 const SizedBox(height: 8),
 
-                // SEATS
+                
                 Text(
                   "Seats left: ${data['seats']}",
                   style: const TextStyle(fontWeight: FontWeight.w600),
@@ -2420,8 +2420,8 @@ void confirmHideRide(BuildContext context, String rideId) {
 
 bool isRideExpired(Map<String, dynamic> ride) {
   try {
-    final date = ride['date']; // yyyy-mm-dd
-    final time = ride['time']; // HH:mm
+    final date = ride['date']; 
+    final time = ride['time'];
 
     final dt = DateTime.parse("$date $time");
     return dt.isBefore(DateTime.now());
