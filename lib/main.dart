@@ -1445,35 +1445,68 @@ class MyPostedRides extends StatelessWidget {
 
         return ListView(
           children: rides.map((ride) {
+            final isActive = ride['isActive'] == true;
+
             return Card(
               child: ListTile(
-                title: Text(
-                  "${ride['from']} → ${ride['to']}",
-                  style: const TextStyle(color: Colors.white),
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "${ride['from']} → ${ride['to']}",
+                        style: TextStyle(
+                          color: isActive ? Colors.white : Colors.redAccent,
+                          decoration: isActive
+                              ? null
+                              : TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ),
+                    if (!isActive)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Text(
+                          "DELETED",
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 subtitle: Text(
                   "${ride['date']} at ${ride['time']}",
-                  style: const TextStyle(color: Colors.white70),
+                  style: TextStyle(
+                    color: isActive ? Colors.white70 : Colors.redAccent,
+                  ),
                 ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () => confirmHideRide(context, ride.id),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MyRideDetailsPage(rideId: ride.id),
-                    ),
-                  );
-                },
+                trailing: isActive
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () => confirmHideRide(context, ride.id),
+                          ),
+                          const Icon(Icons.chevron_right),
+                        ],
+                      )
+                    : null,
+                onTap: isActive
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MyRideDetailsPage(rideId: ride.id),
+                          ),
+                        );
+                      }
+                    : null,
               ),
             );
           }).toList(),
@@ -1806,9 +1839,8 @@ class RideList extends StatelessWidget {
     }
 
     query = FirebaseFirestore.instance
-    .collection('rides')
-    .where('isActive', isEqualTo: true);
-
+        .collection('rides')
+        .where('isActive', isEqualTo: true);
 
     return StreamBuilder<QuerySnapshot>(
       stream: query.snapshots(),
