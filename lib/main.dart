@@ -846,6 +846,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
       'requests': [],
       'passengers': [],
       'createdAt': FieldValue.serverTimestamp(),
+      'isActive': true,
     });
 
     Navigator.pop(context);
@@ -1147,25 +1148,6 @@ class _LoginPageState extends State<LoginPage> {
                             Icons.directions_car,
                             size: 44,
                             color: Colors.black,
-                          ),
-
-                          // V overlay
-                          Positioned(
-                            bottom: 18,
-                            child: Text(
-                              'V',
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.black,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.white.withOpacity(0.4),
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
                         ],
                       ),
@@ -1492,7 +1474,17 @@ class MyPostedRides extends StatelessWidget {
                   "${ride['date']} at ${ride['time']}",
                   style: const TextStyle(color: Colors.white70),
                 ),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      onPressed: () => confirmHideRide(context, ride.id),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+
                 onTap: () {
                   Navigator.push(
                     context,
@@ -1814,7 +1806,9 @@ class RideList extends StatelessWidget {
 
     // force rebuild when search button is pressed
 
-    Query query = FirebaseFirestore.instance.collection('rides');
+    Query query = FirebaseFirestore.instance
+        .collection('rides')
+        .where('isActive', isEqualTo: true);
 
     if (RideFilter.from != "VIT Vellore") {
       query = query.where('from', isEqualTo: RideFilter.from);
@@ -2358,4 +2352,35 @@ class MyRideDetailsPage extends StatelessWidget {
       ),
     );
   }
+}
+
+void confirmHideRide(BuildContext context, String rideId) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("Delete Ride?"),
+      content: const Text(
+        "This ride will be hidden and no longer visible to others.",
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.pop(context);
+            await FirebaseFirestore.instance
+                .collection('rides')
+                .doc(rideId)
+                .update({'isActive': false});
+          },
+          child: const Text(
+            "Delete",
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      ],
+    ),
+  );
 }
