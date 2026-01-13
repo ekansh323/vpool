@@ -1123,33 +1123,14 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF00E5A8), Color(0xFF4FC3F7)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                    ClipOval(
+                      child: SizedBox(
+                        width: 90,
+                        height: 90,
+                        child: Image.asset(
+                          "assets/app_icon.png",
+                          fit: BoxFit.cover,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.35),
-                            blurRadius: 14,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          const Icon(
-                            Icons.directions_car,
-                            size: 44,
-                            color: Colors.black,
-                          ),
-                        ],
                       ),
                     ),
 
@@ -2375,10 +2356,7 @@ void confirmHideRide(BuildContext context, String rideId) {
                 .doc(rideId)
                 .update({'isActive': false});
           },
-          child: const Text(
-            "Delete",
-            style: TextStyle(color: Colors.red),
-          ),
+          child: const Text("Delete", style: TextStyle(color: Colors.red)),
         ),
       ],
     ),
