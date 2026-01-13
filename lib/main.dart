@@ -1805,7 +1805,10 @@ class RideList extends StatelessWidget {
       query = query.where('date', isEqualTo: dateStr);
     }
 
-    query = query.orderBy('createdAt', descending: true);
+    query = FirebaseFirestore.instance
+    .collection('rides')
+    .where('isActive', isEqualTo: true);
+
 
     return StreamBuilder<QuerySnapshot>(
       stream: query.snapshots(),
