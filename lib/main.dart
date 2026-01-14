@@ -9,8 +9,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 final ValueNotifier<int> searchNotifier = ValueNotifier(0);
 
 class RideFilter {
-  static String from = "VIT Vellore";
-  static String to = "Chennai Airport";
+  static String? from;
+  static String? to;
   static DateTime? date;
 }
 
@@ -862,7 +862,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
           children: [
             DropdownButtonFormField<String>(
               value: from,
-              isExpanded: true, 
+              isExpanded: true,
               items: locations
                   .map(
                     (e) => DropdownMenuItem(
@@ -1446,8 +1446,8 @@ class MyPostedRides extends StatelessWidget {
         return ListView(
           children: rides.map((ride) {
             final isActive = ride['isActive'] == true;
-            final isExpired = (ride.data() as Map<String, dynamic>)['expired'] == true;
-
+            final isExpired =
+                (ride.data() as Map<String, dynamic>)['expired'] == true;
 
             return Card(
               child: ListTile(
@@ -1674,11 +1674,11 @@ class _FilterBarState extends State<FilterBar> {
   ];
   void showAllRides() {
     setState(() {
-      RideFilter.from = "VIT Vellore";
-      RideFilter.to = "Chennai Airport";
+      RideFilter.from = null;
+      RideFilter.to = null;
       RideFilter.date = null;
     });
-
+    
     // Force Firestore to re-run with no filters
     searchNotifier.value++;
   }
@@ -1828,16 +1828,15 @@ class RideList extends StatelessWidget {
   Widget build(BuildContext context) {
     final _ = searchNotifier.value; // 👈 makes widget depend on notifier
 
-  
-
     Query query = FirebaseFirestore.instance
         .collection('rides')
         .where('isActive', isEqualTo: true);
 
-    if (RideFilter.from != "VIT Vellore") {
+    if (RideFilter.from != null) {
       query = query.where('from', isEqualTo: RideFilter.from);
     }
-    if (RideFilter.to != "Chennai Airport") {
+
+    if (RideFilter.to != null) {
       query = query.where('to', isEqualTo: RideFilter.to);
     }
 
@@ -1847,10 +1846,6 @@ class RideList extends StatelessWidget {
           "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
       query = query.where('date', isEqualTo: dateStr);
     }
-
-    query = FirebaseFirestore.instance
-        .collection('rides')
-        .where('isActive', isEqualTo: true);
 
     return StreamBuilder<QuerySnapshot>(
       stream: query.snapshots(),
@@ -2330,7 +2325,6 @@ class MyRideDetailsPage extends StatelessWidget {
                 Text("Time: ${data['time']}"),
                 const SizedBox(height: 8),
 
-                
                 Text(
                   "Seats left: ${data['seats']}",
                   style: const TextStyle(fontWeight: FontWeight.w600),
@@ -2420,7 +2414,7 @@ void confirmHideRide(BuildContext context, String rideId) {
 
 bool isRideExpired(Map<String, dynamic> ride) {
   try {
-    final date = ride['date']; 
+    final date = ride['date'];
     final time = ride['time'];
 
     final dt = DateTime.parse("$date $time");
