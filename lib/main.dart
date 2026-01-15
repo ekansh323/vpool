@@ -7,6 +7,15 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 final ValueNotifier<int> searchNotifier = ValueNotifier(0);
+const List<String> LOCATIONS = [
+  "VIT Vellore",
+  "VIT Chennai",
+  "Katpadi Station",
+  "Chennai Airport",
+  "Bangalore Airport",
+  "Chittoor New Bus Stand",
+];
+
 
 class RideFilter {
   static String? from;
@@ -788,15 +797,6 @@ class _CreateRidePageState extends State<CreateRidePage> {
 
   final whatsappController = TextEditingController();
 
-  final locations = [
-    "VIT Vellore",
-    "VIT Chennai",
-    "Katpadi Station",
-    "Chennai Airport",
-    "Bangalore Airport",
-    "Chittoor New Bus Stand",
-  ];
-
   Future<void> saveRide() async {
     final phone = whatsappController.text.trim();
 
@@ -834,22 +834,30 @@ class _CreateRidePageState extends State<CreateRidePage> {
     final timeStr =
         "${time!.hour.toString().padLeft(2, '0')}:${time!.minute.toString().padLeft(2, '0')}";
 
-    await FirebaseFirestore.instance.collection('rides').add({
-      'from': from,
-      'to': to,
-      'date': dateStr,
-      'time': timeStr,
-      'seats': seats,
-      'owner': user?.email,
-      'whatsapp': "91$phone",
-      'caption': captionController.text.trim(),
-      'requests': [],
-      'passengers': [],
-      'createdAt': FieldValue.serverTimestamp(),
-      'isActive': true,
-    });
+    try {
+      await FirebaseFirestore.instance.collection('rides').add({
+        'from': from,
+        'to': to,
+        'date': dateStr,
+        'time': timeStr,
+        'seats': seats,
+        'owner': user?.email,
+        'whatsapp': "91$phone",
+        'caption': captionController.text.trim(),
+        'requests': [],
+        'passengers': [],
+        'createdAt': FieldValue.serverTimestamp(),
+        'isActive': true,
+      });
 
-    Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to post ride: $e")));
+    }
   }
 
   @override
@@ -863,7 +871,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
             DropdownButtonFormField<String>(
               value: from,
               isExpanded: true,
-              items: locations
+              items: LOCATIONS
                   .map(
                     (e) => DropdownMenuItem(
                       value: e,
@@ -871,6 +879,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
                     ),
                   )
                   .toList(),
+
               onChanged: (v) => setState(() => from = v!),
               decoration: const InputDecoration(labelText: "From"),
             ),
@@ -880,7 +889,7 @@ class _CreateRidePageState extends State<CreateRidePage> {
             DropdownButtonFormField<String>(
               value: to,
               isExpanded: true,
-              items: locations
+              items: LOCATIONS
                   .map(
                     (e) => DropdownMenuItem(
                       value: e,
@@ -1664,21 +1673,14 @@ class FilterBar extends StatefulWidget {
 }
 
 class _FilterBarState extends State<FilterBar> {
-  final locations = [
-    "VIT Vellore",
-    "VIT Chennai",
-    "Katpadi Station",
-    "Chennai Airport",
-    "Bangalore Airport",
-    "Chittoor New Bus Stand",
-  ];
+  final locations = LOCATIONS;
   void showAllRides() {
     setState(() {
       RideFilter.from = null;
       RideFilter.to = null;
       RideFilter.date = null;
     });
-    
+
     // Force Firestore to re-run with no filters
     searchNotifier.value++;
   }
@@ -1868,7 +1870,7 @@ class RideList extends StatelessWidget {
 
         final rides = snapshot.data!.docs;
 
-        for (final doc in rides) {
+       /* for (final doc in rides) {
           final data = doc.data() as Map<String, dynamic>;
           if (data['isActive'] == true && isRideExpired(data)) {
             FirebaseFirestore.instance.collection('rides').doc(doc.id).update({
@@ -1877,7 +1879,7 @@ class RideList extends StatelessWidget {
             });
           }
         }
-
+*/
         if (rides.isEmpty) {
           return Center(
             child: Column(
@@ -2414,12 +2416,10 @@ void confirmHideRide(BuildContext context, String rideId) {
 
 bool isRideExpired(Map<String, dynamic> ride) {
   try {
-    final date = ride['date'];
-    final time = ride['time'];
-
-    final dt = DateTime.parse("$date $time");
-    return dt.isBefore(DateTime.now());
+    final dt = DateTime.parse("${ride['date']} ${ride['time']}");
+    return dt.isBefore(DateTime.now().subtract(const Duration(minutes: 5)));
   } catch (_) {
     return false;
   }
 }
+
